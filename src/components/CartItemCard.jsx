@@ -1,80 +1,60 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { CartContext, ProductContext } from "../context/index.js";
 import { getImgUrl } from "../utils/shop-utils.js";
 
 const CartItemCard = ({ cartItem }) => {
-  const { cartData, setCartData } = useContext(CartContext);
-  const { productList, setProductList } = useContext(ProductContext);
-  const [count, setCount] = useState(1);
+  const { state, dispatch } = useContext(CartContext);
+  const { productState, productDispatch } = useContext(ProductContext);
 
-  const handleIncrease = (e, itemId) => {
-    const findProduct = productList.find((item) => item.id === itemId);
+  const handleIncrease = (e, product) => {
+    const findProduct = productState.productList.find(
+      (item) => item.id === product.id
+    );
     if (!findProduct || findProduct.quantity === 0) return;
 
-    setProductList((prevItem) =>
-      prevItem.map((item) =>
-        item.id === itemId
-          ? { ...item, quantity: item.quantity > 0 ? item.quantity - 1 : 0 }
-          : item
-      )
-    );
+    productDispatch({
+      type: "MARK_ADDED_AND_DECREMENT",
+      payload: product,
+    });
 
-    // Update cart data
-    const isInCart = cartData.find((item) => item.id === itemId);
+    const isInCart = state.cartData.find((item) => item.id === product.id);
 
     if (isInCart) {
-      // If already in cart, increase its count
-      setCartData((prevCart) =>
-        prevCart.map((item) =>
-          item.id === itemId ? { ...item, count: item.count + 1 } : item
-        )
-      );
+      dispatch({
+        type: "INCREMENT_CART_COUNT",
+        payload: product,
+      });
     } else {
-      // If not in cart, add it with count: 1
-      setCartData([...cartData, { ...findProduct, count: 1 }]);
+      dispatch({ type: "ADD_TO_CART", payload: findProduct });
     }
-
-    // Optional: Track count separately if you still need it
-    setCount(count + 1);
   };
 
-  const handleRemove = (e, itemId) => {
-    setProductList((prevItem) =>
-      prevItem.map((item) =>
-        item.id === itemId
-          ? { ...item, quantity: item.quantity + count, isAdded: false }
-          : item
-      )
-    );
-    setCartData((prevItem) => prevItem.filter((item) => item.id != itemId));
-    setCount(0);
+  const handleDecrease = (e, product) => {
+    const itemId = product.id;
+    const isInCart = state.cartData.find((item) => item.id === itemId);
+
+    console.log(isInCart);
+
+    if (!isInCart || isInCart.count <= 1) return;
+
+    productDispatch({ type: "MARK_ADDED_AND_INCREMENT", payload: product });
+
+    dispatch({ type: "DECREMENT_CART_COUNT", payload: product });
   };
 
-  const handleDecrease = (e, itemId) => {
-    if (count <= 1) return;
-    setProductList((prevItem) =>
-      prevItem.map((item) =>
-        item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const handleRemove = (e, product) => {
+    dispatch({
+      type: "REMOVE_FROM_CART",
+      payload: product,
+    });
 
-    // Update cart data
-    const isInCart = cartData.find((item) => item.id === itemId);
-
-    if (isInCart) {
-      // If already in cart, increase its count
-      setCartData((prevCart) =>
-        prevCart.map((item) =>
-          item.id === itemId ? { ...item, count: item.count - 1 } : item
-        )
-      );
-    } else {
-      // If not in cart, add it with count: 1
-      setCartData([...cartData, { ...findProduct, count: 1 }]);
-    }
-
-    // Optional: Track count separately if you still need it
-    setCount(count - 1);
+    productDispatch({
+      type: "RESTORE_PRODUCT_ON_REMOVE",
+      payload: {
+        id: product.id,
+        count: product.count,
+      },
+    });
   };
 
   return (
@@ -91,7 +71,7 @@ const CartItemCard = ({ cartItem }) => {
           <h3 className="font-medium">{cartItem.title}</h3>
           <button
             className="text-red-500 text-sm"
-            onClick={(e) => handleRemove(e, cartItem.id)}
+            onClick={(e) => handleRemove(e, cartItem)}
           >
             ×
           </button>
@@ -103,14 +83,14 @@ const CartItemCard = ({ cartItem }) => {
           <div className="flex items-center space-x-2">
             <button
               className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center"
-              onClick={(e) => handleDecrease(e, cartItem.id)}
+              onClick={(e) => handleDecrease(e, cartItem)}
             >
               −
             </button>
-            <span className="text-sm">{count}</span>
+            <span className="text-sm">{cartItem.count}</span>
             <button
               className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center"
-              onClick={(e) => handleIncrease(e, cartItem.id)}
+              onClick={(e) => handleIncrease(e, cartItem)}
             >
               +
             </button>

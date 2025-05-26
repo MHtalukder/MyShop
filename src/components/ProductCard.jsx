@@ -4,28 +4,14 @@ import { getImgUrl } from "../utils/Shop-utils.js";
 import Rating from "./Rating.jsx";
 
 const ProductCard = ({ productItem }) => {
-  const { cartData, setCartData } = useContext(CartContext);
-  const { productList, setProductList } = useContext(ProductContext);
+  const { state, dispatch } = useContext(CartContext);
+  const { productState, productDispatch } = useContext(ProductContext);
 
   function handleAddToCart(event, product) {
     if (product.quantity <= 0) return;
 
-    const alreadyInCart = cartData.some((item) => item.id === product.id);
-    if (!alreadyInCart) {
-      setCartData([...cartData, { ...product, count: 1 }]);
-    }
-
-    setProductList((prevList) =>
-      prevList.map((item) =>
-        item.id === product.id
-          ? {
-              ...item,
-              quantity: item.quantity - 1,
-              isAdded: true,
-            }
-          : item
-      )
-    );
+    dispatch({ type: "ADD_TO_CART", payload: product });
+    productDispatch({ type: "MARK_ADDED_AND_DECREMENT", payload: product });
   }
 
   return (

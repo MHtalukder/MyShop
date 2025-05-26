@@ -3,11 +3,11 @@ import { ProductContext } from "../context/index.js";
 import ProductCard from "./ProductCard.jsx";
 
 const ProductSection = () => {
-  const { productList } = useContext(ProductContext);
+  const { productState } = useContext(ProductContext);
   const [sortOption, setSortOption] = useState("Most Popular");
 
   const getSortedProducts = () => {
-    const sorted = [...productList];
+    const sorted = [...productState.productList];
     switch (sortOption) {
       case "Price: Low to High":
         return sorted.sort((a, b) => a.price - b.price);

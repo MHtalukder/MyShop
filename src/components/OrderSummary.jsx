@@ -2,15 +2,15 @@ import { useContext } from "react";
 import { CartContext } from "../context/index.js";
 
 const OrderSummary = () => {
-  const { cartData } = useContext(CartContext);
+  const { state } = useContext(CartContext);
 
   let subTotal = 0;
   let discount = 0;
   let deliveryFee = 0;
   let total = 0;
 
-  if (cartData.length > 0) {
-    subTotal = cartData.reduce(
+  if (state.cartData.length > 0) {
+    subTotal = state.cartData.reduce(
       (sum, item) => sum + item.price * (item.count || 1),
       0
     );

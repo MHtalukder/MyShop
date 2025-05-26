@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useReducer } from "preact/hooks";
 import "./app.css";
 import Announcement from "./components/Announcement";
 import CartSection from "./components/CartSection";
@@ -7,19 +7,20 @@ import Header from "./components/Header";
 import NewsLetter from "./components/NewsLetter";
 import ProductSection from "./components/ProductSection";
 import { CartContext, ProductContext } from "./context";
-import ProductItemList from "./db/productList";
+import { cartReducer, initialState } from "./reducer/CartReducer";
+import { productInitialState, productReducer } from "./reducer/ProductReducer";
 
 export function App() {
-  const [cartData, setCartData] = useState([]);
-  const [productList, setProductList] = useState(ProductItemList);
-  const [originalProductList] = useState(ProductItemList);
+  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [productState, productDispatch] = useReducer(
+    productReducer,
+    productInitialState
+  );
 
   return (
     <>
-      <ProductContext.Provider
-        value={{ originalProductList, productList, setProductList }}
-      >
-        <CartContext.Provider value={{ cartData, setCartData }}>
+      <ProductContext.Provider value={{ productState, productDispatch }}>
+        <CartContext.Provider value={{ state, dispatch }}>
           <Announcement />
           <Header />
           <main class="container mx-auto px-4 md:px-8 py-8">

@@ -3,8 +3,7 @@ import { ProductContext } from "../context/index.js";
 let debounceTimer = null;
 
 const Search = () => {
-  const { originalProductList, productList, setProductList } =
-    useContext(ProductContext);
+  const { productDispatch } = useContext(ProductContext);
   const [search, setSearch] = useState("");
 
   const handleChange = (e) => {
@@ -14,15 +13,7 @@ const Search = () => {
     if (debounceTimer) clearTimeout(debounceTimer);
 
     debounceTimer = setTimeout(() => {
-      if (!value) {
-        setProductList(originalProductList);
-        return;
-      }
-
-      const filtered = originalProductList.filter((item) =>
-        item.title.toLowerCase().includes(value.toLowerCase())
-      );
-      setProductList(filtered);
+      productDispatch({ type: "SEARCH_PRODUCT", payload: value });
     }, 300);
   };
 
